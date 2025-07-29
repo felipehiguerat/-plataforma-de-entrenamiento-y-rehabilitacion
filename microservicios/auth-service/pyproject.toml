@@ -9,11 +9,13 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "3.12.10"
+
 fastapi = ">=0.116.1,<0.117.0"
 uvicorn= ">=0.35.0,<0.36.0"
-
-
+sqlmodel = "^0.0.24"
+psycopg2-binary = {version = "2.9.9", extras = ["binary"]}
+email-validator = "^2.2.0"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=1.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
