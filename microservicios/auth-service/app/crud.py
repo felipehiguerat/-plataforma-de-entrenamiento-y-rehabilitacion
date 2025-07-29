@@ -3,6 +3,7 @@
 from typing import List, Optional
 from sqlmodel import Session, select
 from app.models import User, UserCreate
+from app.security import get_password_hash
 
 class UserRepository:
     def __init__(self, db: Session):
@@ -25,14 +26,15 @@ class UserRepository:
 
     def create_user(self, user_in: UserCreate) -> User:
         """Crea un nuevo usuario en la base de datos."""
+        hashed_password = get_password_hash(user_in.password) 
         # Crea una instancia del modelo User a partir de UserCreate
         db_user = User(
             email=user_in.email,
-            hashed_password=user_in.password, # ¡OJO! Esto se hasheará más adelante
+            hashed_password=hashed_password, 
             is_active=True,
             is_admin=False
         )
         self.db.add(db_user)
         self.db.commit()
-        self.db.refresh(db_user) # Actualiza la instancia con los datos de la DB (ej. el ID generado)
+        self.db.refresh(db_user) 
         return db_user

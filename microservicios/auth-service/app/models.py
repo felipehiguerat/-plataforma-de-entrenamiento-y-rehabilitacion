@@ -17,3 +17,7 @@ class User(SQLModel, table=True):
 class UserCreate(SQLModel):
     email: EmailStr
     password: str
+
+class UserLogin(SQLModel):
+    email: EmailStr
+    password: str

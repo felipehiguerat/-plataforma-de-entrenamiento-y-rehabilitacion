@@ -1,18 +1,41 @@
-# plataforma-entrenamiento-deportivo/docker-compose/docker-compose.yml
-version: '3.8'
-
 services:
   db:
-    image: postgres:16-alpine # Usamos la versión 16 de PostgreSQL, ligera con Alpine
+    image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_DB: auth_db # Nombre de la base de datos para el servicio de auth
-      POSTGRES_USER: user # Usuario de la base de datos
-      POSTGRES_PASSWORD: password # Contraseña del usuario
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432" # Mapea el puerto del contenedor al host
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data # Persistencia de datos
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  auth-service:
+    build:
+      context: ../microservicios/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8001"
+    environment:
+      # Updated to use individual environment variables
+      DB_HOST: db # This is the service name of your database container
+      DB_PORT: 5432
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      SECRET_KEY: "tu_super_clave_secreta_aqui_para_jwt_cambiala_en_produccion" # Asegúrate que sea la misma de tu app/config.py
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
 
 volumes:
   db_data: # Define el volumen para la persistencia

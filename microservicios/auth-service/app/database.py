@@ -1,4 +1,3 @@
-# microservicios/auth-service/app/database.py
 import os
 from sqlmodel import create_engine, Session, SQLModel
 
