@@ -17,6 +17,30 @@ services:
       retries: 5
       start_period: 10s
 
+
+  exercises_db_service:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: exercises_db # ¡Nueva base de datos para Exercises!
+      POSTGRES_USER: user # Puedes usar el mismo usuario y contraseña si quieres, o cambiarlos
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432" # ¡Nuevo puerto en el host para esta DB!
+    volumes:
+      - exercises_db_data:/var/lib/postgresql/data # Volumen dedicado para Exercises DB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d exercises_db"] # Chequea la nueva DB
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
+
+
+
+
   auth-service:
     build:
       context: ../microservicios/auth-service
@@ -37,5 +61,22 @@ services:
         condition: service_healthy
     restart: on-failure
 
+
+
+  exercises-sessions-service:
+    build:
+      context: ../microservicios/exercises-sessions-service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8001"
+    environment:
+      DATABASE_URL: postgresql://user:password@exercises_db_service/exercises_db # Apunta a su nueva DB dedicada
+    depends_on:
+      exercises_db_service: # Ahora depende de su propia DB
+        condition: service_healthy
+    restart: on-failure
+
+
 volumes:
   db_data: # Define el volumen para la persistencia
+  exercises_db_data:

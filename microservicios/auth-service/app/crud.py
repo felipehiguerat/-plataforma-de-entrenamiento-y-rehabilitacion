@@ -1,40 +1,52 @@
-
-# microservicios/auth-service/app/crud.py
 from typing import List, Optional
+from uuid import UUID
+
 from sqlmodel import Session, select
-from app.models import User, UserCreate
-from app.security import get_password_hash
+from app.models import User, UserCreate, UserUpdate # Asegúrate que estos modelos están definidos en models.py
 
 class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_user_by_email(self, email: str) -> Optional[User]:
-        """Obtiene un usuario por su dirección de email."""
-        # Usamos `select` de SQLModel para construir la consulta
-        statement = select(User).where(User.email == email)
-        return self.db.exec(statement).first()
-
-    def get_user_by_id(self, user_id: int) -> Optional[User]:
-        """Obtiene un usuario por su ID."""
-        return self.db.get(User, user_id) # Método más directo para buscar por PK
-
-    def get_all_users(self) -> List[User]:
-        """Obtiene todos los usuarios."""
-        statement = select(User)
-        return self.db.exec(statement).all()
-
-    def create_user(self, user_in: UserCreate) -> User:
-        """Crea un nuevo usuario en la base de datos."""
-        hashed_password = get_password_hash(user_in.password) 
-        # Crea una instancia del modelo User a partir de UserCreate
+    def create_user(self, user: UserCreate, hashed_password: str) -> User:
         db_user = User(
-            email=user_in.email,
-            hashed_password=hashed_password, 
-            is_active=True,
-            is_admin=False
+            username=user.username,       # Cambiado a minúsculas
+            email=user.email,             # Cambiado a minúsculas
+            hashed_password=hashed_password,
+            age=user.age,                 # Cambiado a minúsculas
+            sex=user.sex,                 # Cambiado a minúsculas
+            objective=user.objective,     # Cambiado a minúsculas
+            # is_active y is_admin tienen valores por defecto en el modelo User
         )
         self.db.add(db_user)
         self.db.commit()
-        self.db.refresh(db_user) 
+        self.db.refresh(db_user)
         return db_user
+
+    def get_user(self, user_id: str) -> Optional[User]:
+        # Para UUID, puedes buscar por el ID de la tabla
+        return self.db.get(User, UUID(user_id)) # Asegúrate de convertir a UUID
+
+    def get_users(self, offset: int = 0, limit: int = 100) -> List[User]:
+        statement = select(User).offset(offset).limit(limit)
+        return self.db.exec(statement).all()
+
+    def get_user_by_username(self, username: str) -> Optional[User]: # Cambiado a minúsculas
+        statement = select(User).where(User.username == username) # Cambiado a minúsculas
+        return self.db.exec(statement).first()
+
+    def get_user_by_email(self, email: str) -> Optional[User]: # Añadida función para buscar por email
+        statement = select(User).where(User.email == email) # Cambiado a minúsculas
+        return self.db.exec(statement).first()
+
+    def update_user(self, db_user: User) -> User:
+        self.db.add(db_user)
+        self.db.commit()
+        self.db.refresh(db_user)
+        return db_user
+
+    def delete_user(self, user_id: str) -> None:
+        user = self.db.get(User, UUID(user_id))
+        if user:
+            self.db.delete(user)
+            self.db.commit()
