@@ -37,7 +37,7 @@ class ExerciseSessionBase(BaseModel):
 
 class ExerciseSessionCreate(ExerciseSessionBase):
     user_id: UUID
-    notes: Optional[str] = None
+    name: Optional[str] = None
 
 
 
@@ -46,5 +46,6 @@ class ExerciseSessionRead(ExerciseSessionBase):
     user_id: UUID
     exercises: List[ExerciseRead] = []
     username: Optional[str] = None
+    name: Optional[str] = None  
 
     model_config = ConfigDict(from_attributes=True)

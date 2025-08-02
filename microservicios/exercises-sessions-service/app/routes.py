@@ -25,11 +25,14 @@ async def get_sessions_by_user(user_id: str, db: Session = Depends(get_db)):
     return await crud_session.get_sessions_by_user(db, user_id)
 
 @router.get("/{session_id}", response_model=ExerciseSessionRead)
-def get_session(session_id: str, db: Session = Depends(get_db)):
-    session = crud_session.get_session(db, session_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-    return session
+async def get_session(session_id: str, db: Session = Depends(get_db)):
+    return await crud_session.get_session(db, session_id)
+   
+
+@router.get("/", response_model=List[ExerciseSessionRead])
+async def get_all_sessions(db: Session = Depends(get_db)):
+    return await crud_session.get_all_sessions_with_usernames(db)
+
 
 # -------------------------
 # Exercise endpoints

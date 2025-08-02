@@ -12,7 +12,8 @@ from app.user_client import validate_user_exists
 def create_session(db: Session, session_data: ExerciseSessionCreate) -> ExerciseSession:
     session = ExerciseSession(
         user_id=session_data.user_id,
-        date=session_data.date
+        date=session_data.date,
+        name=session_data.name
     )
     db.add(session)
     db.commit()
@@ -24,6 +25,7 @@ async def get_sessions_by_user(db: Session, user_id: str) -> List[ExerciseSessio
     sessions = db.query(ExerciseSession).filter(ExerciseSession.user_id == user_id).all()
     user_data = await validate_user_exists(user_id)
     username = user_data.get("username", "Unknown")
+    name = user_data.get("name", "Unknown")
 
     session_list = []
     for session in sessions:
@@ -33,9 +35,33 @@ async def get_sessions_by_user(db: Session, user_id: str) -> List[ExerciseSessio
 
     return session_list
 
+async def get_all_sessions_with_usernames(db: Session) -> List[ExerciseSessionRead]:
+    sessions = db.query(ExerciseSession).all()
+    session_list = []
+    for session in sessions:
+        user_data = await validate_user_exists(str(session.user_id))
+        username = user_data.get("username", "Unknown")
+        name = user_data.get("name", "Unknown")
+        session_schema = ExerciseSessionRead.model_validate(session)
+        session_schema.username = username
+        session_list.append(session_schema)
+    return session_list
 
-def get_session(db: Session, session_id: str) -> Optional[ExerciseSession]:
-    return db.query(ExerciseSession).filter(ExerciseSession.id == session_id).first()
+
+async def get_session(db: Session, id: str) -> ExerciseSessionRead:
+    # 1. Obtener una sola sesión de la base de datos
+    session = db.query(ExerciseSession).filter(ExerciseSession.id == id).first()
+    
+    # 2. Manejar el caso en que la sesión no se encuentre
+    if not session:
+        return None # O lanzar una excepción HTTP 404
+    
+    user_data = await validate_user_exists(session.user_id)
+    username = user_data.get("username", "Unknown")
+    session_schema = ExerciseSessionRead.model_validate(session)
+    session_schema.username = username
+
+    return session_schema
 
 
 # ---------------------
