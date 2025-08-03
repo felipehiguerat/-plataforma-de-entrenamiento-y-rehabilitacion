@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models import Exercise, ExerciseSession
-from app.schemas import ExerciseCreate, ExerciseSessionCreate, ExerciseSessionRead
+from app.schemas import ExerciseCreate, ExerciseSessionCreate, ExerciseSessionRead, ExerciseRead
 from typing import List, Optional
 from app.user_client import validate_user_exists
 
@@ -63,6 +63,16 @@ async def get_session(db: Session, id: str) -> ExerciseSessionRead:
 
     return session_schema
 
+async def delete_session(db: Session, id: str):
+    to_delete = db.query(ExerciseSession).filter(ExerciseSession.id == id).first()
+    
+    if to_delete:
+        db.delete(to_delete)
+        db.commit()
+        return True
+    
+    return False
+
 
 # ---------------------
 # CRUD - Exercise
@@ -85,9 +95,14 @@ def add_exercise_to_session(db: Session, exercise_data: ExerciseCreate) -> Exerc
     return exercise
 
 
+def get_all_exercises(db: Session) -> List[ExerciseRead]:
+    return db.query(Exercise).all()
+
+
 def get_exercises_by_session(db: Session, session_id: str) -> List[Exercise]:
     return db.query(Exercise).filter(Exercise.session_id == session_id).all()
 
 
 def get_exercise(db: Session, exercise_id: str) -> Optional[Exercise]:
     return db.query(Exercise).filter(Exercise.id == exercise_id).first()
+

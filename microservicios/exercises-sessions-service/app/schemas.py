@@ -21,7 +21,6 @@ class ExerciseCreate(ExerciseBase):
 
 
 class ExerciseRead(ExerciseBase):
-    id: UUID
     session_id: UUID
     seession_name: Optional[str] = None  
 
@@ -34,7 +33,9 @@ class ExerciseRead(ExerciseBase):
 class ExerciseSessionBase(BaseModel):
     date: date
 
-
+class ExerciseSessionBased(BaseModel):
+    pass
+    
 class ExerciseSessionCreate(ExerciseSessionBase):
     user_id: UUID
     name: Optional[str] = None
@@ -49,3 +50,8 @@ class ExerciseSessionRead(ExerciseSessionBase):
     name: Optional[str] = None  
 
     model_config = ConfigDict(from_attributes=True)
+
+class ExerciseSessionDelete(ExerciseSessionBased):
+    id: UUID
+    user_id: Optional[UUID] = None
+    
