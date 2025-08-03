@@ -16,7 +16,7 @@ class ExerciseSession(Base):
     name = Column(String, nullable=True)  # Día de la sesión
     
 
-    exercises = relationship("Exercise", back_populates="session")
+    exercises = relationship("Exercise", back_populates="session", cascade="all, delete-orphan")
 
 
 class Exercise(Base):

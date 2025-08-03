@@ -17,10 +17,15 @@ router = APIRouter(prefix="/sessions", tags=["Sessions"])
 # -------------------------
 # Session endpoints
 # -------------------------
+@router.get("/by-username/{username}/sessions", response_model=List[ExerciseSessionRead])
+async def get_sessions_by_username(username: str, db: Session = Depends(get_db)):
+    return await crud_session.get_sessions_by_username(db, username)
 
-@router.post("/", response_model=ExerciseSessionCreate)
-def create_session(session_data: ExerciseSessionCreate, db: Session = Depends(get_db)):
-    return crud_session.create_session(db, session_data)
+
+@router.get("/by-username/{username}/exercises", response_model=List[ExerciseRead])
+async def get_exercises_by_username(username: str, db: Session = Depends(get_db)):
+    return await crud_session.get_exercises_by_username(db, username)
+
 
 @router.get("/exercises", response_model=List[ExerciseRead])
 def get_all_exercises(db: Session = Depends(get_db)):
@@ -39,6 +44,10 @@ async def get_session(session_id: str, db: Session = Depends(get_db)):
 async def get_all_sessions(db: Session = Depends(get_db)):
     return await crud_session.get_all_sessions_with_usernames(db)
 
+@router.post("/", response_model=ExerciseSessionCreate)
+def create_session(session_data: ExerciseSessionCreate, db: Session = Depends(get_db)):
+    return crud_session.create_session(db, session_data)
+
 
 @router.delete("/{id}", response_model=ExerciseSessionDelete)
 async def delete_session(id: str, db: Session = Depends(get_db)):
@@ -47,7 +56,7 @@ async def delete_session(id: str, db: Session = Depends(get_db)):
     if not was_deleted:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    return {"message": "Session deleted successfully"}
+    return ExerciseSessionDelete(id=id)
 
 
 
@@ -76,5 +85,12 @@ def get_exercise(exercise_id: int, db: Session = Depends(get_db)):
 def get_exercises_by_session(session_id: str, db: Session = Depends(get_db)):
     return crud_session.get_exercises_by_session(db, session_id)
 
+
+@router.delete("/exercise/{id}", response_model=dict)
+async def delete_exercise(id: str, db: Session = Depends(get_db)):
+    was_deleted = await crud_session.delete_exercise(db=db, id=id)
+    if not was_deleted:
+        raise HTTPException(status_code=404, detail=" exercise not found")
+    return {"message": "Exercise deleted successfully", "id": id}
 
 
