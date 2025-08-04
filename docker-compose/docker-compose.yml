@@ -37,7 +37,23 @@ services:
       start_period: 10s
 
 
-
+  biometric_db_service:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: biometric_db # Nueva base de datos para Biometrics
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432" # Nuevo puerto en el host para esta DB
+    volumes:
+      - biometric_db_data:/var/lib/postgresql/data # Volumen dedicado para Biometrics DB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d biometric_db"] # Chequea la nueva DB
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 
 
@@ -76,7 +92,21 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  biometric-service:
+    build:
+      context: ../microservicios/biometric-service # Asegúrate que esta ruta sea correcta
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8001" # Nuevo puerto para el servicio de biometría
+    environment:
+      DATABASE_URL: postgresql://user:password@biometric_db_service/biometric_db # Apunta a su nueva DB dedicada
+    depends_on:
+      biometric_db_service: # Ahora depende de su propia DB
+        condition: service_healthy
+    restart: on-failure
+
 
 volumes:
   db_data: # Define el volumen para la persistencia
   exercises_db_data:
+  biometric_db_data:
