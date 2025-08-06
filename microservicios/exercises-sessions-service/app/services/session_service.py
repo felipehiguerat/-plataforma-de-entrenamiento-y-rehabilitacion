@@ -1,8 +1,8 @@
 # services/session_service.py
 
 from sqlalchemy.orm import Session
-from app.models import Session as SessionModel, Exercise
-from app.schemas import SessionCreate, ExerciseCreate
+from app.domain.models import Session as SessionModel, Exercise
+from app.domain.schemas.schemas_exercise import SessionCreate, ExerciseCreate
 from user_client import validate_user_exists
 
 async def create_session(db: Session, session_data: SessionCreate):

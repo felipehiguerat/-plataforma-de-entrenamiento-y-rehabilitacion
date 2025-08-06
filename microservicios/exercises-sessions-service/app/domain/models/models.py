@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 
 
-from .database import Base
+from app.core.database import Base
 
 class ExerciseSession(Base):
     __tablename__ = "exercise_sessions"
