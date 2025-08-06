@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID
-from app.domain.schemas.schemas import BiometricRead,BiometricCreate
+from app.domain.schemas.schemas import BiometricRead,BiometricCreate,BiometricUpdate
 
 from app.domain.models.models import Biometric as BiometricModel
 
@@ -32,17 +32,19 @@ class BiometricRepository:
             BiometricModel.dataType == data_type
         ).all()
 
-    def update(self, db: Session, biometric_id: UUID, biometric_update: BiometricRead) -> Optional[BiometricModel]:
+    def update(self, db: Session, biometric_id: UUID, biometric_update: BiometricUpdate) -> Optional[BiometricModel]:
         """Actualiza un registro biométrico existente."""
         db_biometric = self.get_by_id(db, biometric_id)
         if db_biometric:
+            # Itera sobre los campos que tienen un valor en el esquema de actualización
             for key, value in biometric_update.model_dump(exclude_unset=True).items():
                 setattr(db_biometric, key, value)
             db.commit()
             db.refresh(db_biometric)
         return db_biometric
 
-    def delete(self, db: Session, biometric_id: UUID) -> Optional[BiometricModel]:
+
+    def delete(self, db: Session, biometric_id: UUID ) -> BiometricModel:
         """Elimina un registro biométrico por su ID."""
         db_biometric = self.get_by_id(db, biometric_id)
         if db_biometric:

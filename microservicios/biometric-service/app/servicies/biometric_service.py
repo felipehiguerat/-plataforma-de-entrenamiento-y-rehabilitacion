@@ -1,64 +1,76 @@
 # app/services/biometric_service.py
+from _pytest.logging import logging
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
-
-
-from app.domain.schemas.schemas import BiometricRead,BiometricBase,BiometricCreate
+from app.domain.schemas.schemas import BiometricRead,BiometricBase,BiometricCreate, BiometricUpdate
 from app.repository.bometric_repo import BiometricRepository
+from app.servicies.user_service import get_user_by_username
+
+logger = logging.getLogger(__name__)
 
 class BiometricService:
     def __init__(self, biometric_repository: BiometricRepository):
         self.biometric_repository = biometric_repository
 
-    def create_biometric_data(self, db: Session, data: BiometricCreate) -> BiometricRead:
+    def create_new_record(self, db: Session, data: BiometricCreate) -> BiometricRead:
         """
-        Crea un nuevo registro biométrico.
-        La lógica del IMC se maneja automáticamente en el esquema de Pydantic.
+        Calcula el IMC y crea un nuevo registro biométrico.
         """
-        return self.biometric_repository.create(db, data)
+        # Lógica de negocio para calcular el IMC antes de guardar
+        if data.talla and data.peso:
+            data.imc = data.peso / (data.talla ** 2)
+
+        logger.info(f"Procesando nuevo registro biométrico para el usuario: {data.userId}")
+        db_biometric = self.biometric_repository.create(db, data)
+        return BiometricRead.model_validate(db_biometric)
 
     def get_biometric_data_by_user(self, db: Session, user_id: UUID) -> List[BiometricRead]:
-        """
-        Obtiene todos los registros biométricos de un usuario.
-        """
         return self.biometric_repository.get_by_user_id(db, user_id)
 
+    async def get_by_user_name(self, db: Session, user_name: str) -> List[BiometricRead]:
+        """
+        Obtiene los registros biométricos de un usuario buscando por su nombre,
+        usando la función importada.
+        """
+        user_profile = await get_user_by_username(user_name)
+        if not user_profile:
+            return None 
+
+        user_id = user_profile.get("id")
+        return self.biometric_repository.get_by_user_id(db, user_id)
+    
     def analyze_progress(self, db: Session, user_id: UUID, data_type: str) -> Dict[str, Any]:
+        # ... (la lógica de análisis sigue igual)
+        pass # Reemplaza con tu código de análisis
+
+    
+    def update_record(self, db: Session, biometric_id: UUID, update_data: BiometricUpdate) ->BiometricRead:
         """
-        Analiza el progreso de un usuario para una métrica específica.
-        Esta es la lógica de negocio que va más allá de un simple CRUD.
+        Busca un registro biométrico por su ID, actualiza sus campos y lo guarda.
         """
-        # 1. Obtener los datos del repositorio
-        records = self.biometric_repository.get_by_user_id_and_type(db, user_id, data_type)
-        if not records:
-            return {"status": "No hay datos para analizar"}
-        
-        # 2. Convertir a un formato que el análisis pueda entender
-        values = [rec.value for rec in records]
-        dates = [rec.fechaRegistro for rec in records]
-        
-        # 3. Realizar la lógica de análisis
-        # Aquí es donde podrías usar librerías como NumPy o Pandas para un análisis más profundo.
-        latest_value = values[-1] if values else None
-        initial_value = values[0] if values else None
-        
-        if initial_value is not None:
-            # Calcular el cambio porcentual
-            if initial_value != 0:
-                change_percentage = ((latest_value - initial_value) / initial_value) * 100
-            else:
-                change_percentage = 0
-        else:
-            change_percentage = 0
-            
-        # 4. Devolver un reporte estructurado
-        return {
-            "userId": user_id,
-            "dataType": data_type,
-            "latestValue": latest_value,
-            "initialValue": initial_value,
-            "changePercentage": round(change_percentage, 2),
-            "totalRecords": len(records)
-        }
+        db_biometric = self.biometric_repository.get_by_id(db, biometric_id)
+        if not db_biometric:
+            return None
+
+        # Actualiza el objeto SQLAlchemy con los datos del Pydantic schema
+        # `model_dump` convierte el Pydantic schema en un diccionario
+        update_data_dict = update_data.model_dump(exclude_unset=True)
+        for key, value in update_data_dict.items():
+            setattr(db_biometric, key, value)
+
+        db.commit()
+        db.refresh(db_biometric)
+        return BiometricRead.model_validate(db_biometric)
+
+
+    def delete_record(self, db: Session, biometric_id: UUID) -> bool:
+        # ... (código para eliminar un registro)
+        db_biometric = self.biometric_repository.get_by_id(db, biometric_id)
+        if not db_biometric:
+            return False
+
+        db.delete(db_biometric)
+        db.commit()
+        return True

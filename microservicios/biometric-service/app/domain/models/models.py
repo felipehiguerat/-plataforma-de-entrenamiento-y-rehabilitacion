@@ -15,21 +15,18 @@ class Biometric(Base):
     talla = Column(Float, nullable=False)
     peso = Column(Float, nullable=False)
     
-    # IMC puede ser calculado en el servicio antes de guardar
     imc = Column(Float, nullable=False)
     
     grasaCorporal = Column(Float, nullable=True)
     masaMuscular = Column(Float, nullable=True)
     
-    # Se separa la presión arterial para facilitar consultas
+    # Se mantienen solo las nuevas columnas de presión arterial
     presionSistolica = Column(Integer, nullable=True)
     presionDiastolica = Column(Integer, nullable=True)
     
     frecuenciaCardiaca = Column(Integer, nullable=True)
     
-    # Se usa DateTime para el manejo correcto de fechas y horas
     fechaRegistro = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     def __repr__(self):
         return f"<Biometric(biometricId='{self.biometricId}', userId='{self.userId}')>"
-
