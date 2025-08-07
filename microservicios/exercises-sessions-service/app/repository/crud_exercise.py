@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models import Exercise, ExerciseSession
+from app.domain.models.models import Exercise, ExerciseSession
 from app.domain.schemas.schema_sesssion import ExerciseCreate, ExerciseSessionCreate, ExerciseSessionRead, ExerciseRead
 from typing import List, Optional
 from app.services.user_client import  get_user_by_username, validate_user_exists
