@@ -13,7 +13,7 @@ class ExerciseSession(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), nullable=False)
     date = Column(Date, default=datetime.utcnow().date)  # Día de la sesión
-    name = Column(String, nullable=True)  # Día de la sesión
+    name_session= Column(String, nullable=True)  # Día de la sesión
     
 
     exercises = relationship("Exercise", back_populates="session", cascade="all, delete-orphan")
@@ -25,7 +25,7 @@ class Exercise(Base):
     exercise_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     session_id = Column(UUID(as_uuid=True), ForeignKey("exercise_sessions.id"), nullable=False)
 
-    name = Column(String, nullable=False)
+    name_exercise = Column(String, nullable=False)
     description = Column(String, nullable=True)
 
     weight = Column(Float, nullable=True)

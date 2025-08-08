@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
 from app.domain.models.models import Exercise, ExerciseSession
-from app.domain.schemas.schema_sesssion import ExerciseCreate, ExerciseSessionCreate, ExerciseSessionRead, ExerciseRead
+from app.domain.schemas.schemas_exercise import ExerciseCreate, ExerciseRead
+from app.domain.schemas.schema_sesssion import ExerciseSessionCreate, ExerciseSessionRead
+# Importa los esquemas de sesión desde el archivo de sesiones
+
 from typing import List, Optional
 from app.services.user_client import  get_user_by_username, validate_user_exists
 

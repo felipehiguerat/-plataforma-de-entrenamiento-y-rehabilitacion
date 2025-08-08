@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.repository.crud_exercise import crud as crud_session
-from app.domain.schemas.schemas_exercise import (
-    ExerciseSessionCreate, 
-    ExerciseCreate, 
-    ExerciseSessionRead, 
-    ExerciseRead,
-    ExerciseSessionDelete
+from app.repository import  crud_session
+from app.domain.schemas.schemas_exercise import ExerciseCreate, ExerciseRead
+from app.domain.schemas.schema_sesssion import ExerciseSessionCreate, ExerciseSessionRead
+from app.repository.crud_exercise import *
 
-)
+
+
 from typing import List
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
