@@ -32,11 +32,11 @@ class ExerciseSessionRead(ExerciseSessionBase):
     model_config = ConfigDict(from_attributes=True)
 
 class ExerciseSessionDelete(ExerciseSessionBased):
-    id: UUID
-    user_id: Optional[UUID] = None
-    name_session: str = None
+    username: str
+    name_session: str 
 
 
 class ExerciseSessionUpdate(ExerciseSessionBase):
-    name_session: Optional[str] = None
+    name_session: str
+    username: str
     

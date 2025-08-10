@@ -21,20 +21,14 @@ def get_session_repository(db: Session = Depends(get_db)):
 # Session endpoints
 # -------------------------
 @router.get("/by-username/{username}/sessions", response_model=List[ExerciseSessionRead])
-async def get_sessions_by_username(username: str, db: Session = Depends(get_db)):
-    return await SessionRepository.get_sessions_by_username(db, username)
+async def get_sessions_by_username(
+    username: str, 
+    session_repo: SessionRepository = Depends(get_session_repository)
+) -> List[ExerciseSessionRead]:
+ 
+    return await session_repo.get_sessions_by_username(username)
 
 
-
-
-@router.get("/user/{user_id}", response_model=List[ExerciseSessionRead])
-async def get_sessions_by_user(user_id: str, db: Session = Depends(get_db)):
-    return await SessionRepository.get_sessions_by_user(db, user_id)
-
-@router.get("/{session_id}", response_model=ExerciseSessionRead)
-async def get_session(session_id: str, db: Session = Depends(get_db)):
-    return await SessionRepository.get_session(db, session_id)
-   
 
 @router.get("/", response_model=List[ExerciseSessionRead])
 async def get_all_sessionset_all_sessions_with_usernames(
@@ -52,14 +46,20 @@ async def create_session(
     return await session_repo.create_session(session_data)
 
 
-@router.delete("/{id}", response_model=ExerciseSessionDelete)
-async def delete_session(id: str, db: Session = Depends(get_db)):
-    was_deleted = await SessionRepository.delete_session(db=db, id=id)
+@router.delete("/", response_model=dict)
+async def delete_session(
+    session_data: ExerciseSessionDelete,
+    session_repo: SessionRepository = Depends(get_session_repository)
+):
+    """
+    Elimina una sesión por el nombre de usuario y el nombre de la sesión.
+    """
+    was_deleted = await session_repo.delete_session(session_data)
     
     if not was_deleted:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    return ExerciseSessionDelete(id=id)
+    return {"message": "Session deleted successfully"}
 
 
 
