@@ -37,17 +37,19 @@ async def get_session(session_id: str, db: Session = Depends(get_db)):
    
 
 @router.get("/", response_model=List[ExerciseSessionRead])
-async def get_all_sessions(db: Session = Depends(get_db)):
-    return await SessionRepository.get_all_sessions_with_usernames(db)
+async def get_all_sessionset_all_sessions_with_usernames(
+    session_repo: SessionRepository = Depends(get_session_repository)
+):
+   
+    return await session_repo.get_all_sessions_with_usernames()
 
 @router.post("/", response_model=ExerciseSessionRead, status_code=status.HTTP_201_CREATED)
-def create_session(
+async def create_session(
     session_data: ExerciseSessionCreate,
     session_repo: SessionRepository = Depends(get_session_repository)
 ):
-    """Creates a new exercise session."""
-    created_session = session_repo.create_session(session_data)
-    return created_session
+    """Crea una nueva sesión de ejercicio a partir del nombre de usuario."""
+    return await session_repo.create_session(session_data)
 
 
 @router.delete("/{id}", response_model=ExerciseSessionDelete)

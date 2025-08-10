@@ -46,7 +46,7 @@ app = FastAPI(
 # Inclusión de rutas
 # ---------------------
 
-app.include_router(auth_router.router, prefix="/api/v1/auth")
+app.include_router(auth_router.router)
 
 # ---------------------
 # Ruta principal

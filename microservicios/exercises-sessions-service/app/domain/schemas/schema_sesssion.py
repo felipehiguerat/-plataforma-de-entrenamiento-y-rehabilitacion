@@ -17,7 +17,7 @@ class ExerciseSessionBased(BaseModel):
     pass
     
 class ExerciseSessionCreate(ExerciseSessionBase):
-    user_id: UUID
+    username: str
     name_session:str = None
 
 
@@ -27,7 +27,7 @@ class ExerciseSessionRead(ExerciseSessionBase):
     user_id: UUID
     exercises: List[ExerciseRead] = []
     username: Optional[str] = None
-    name: Optional[str] = None  
+    name_session: Optional[str] = None  
 
     model_config = ConfigDict(from_attributes=True)
 
