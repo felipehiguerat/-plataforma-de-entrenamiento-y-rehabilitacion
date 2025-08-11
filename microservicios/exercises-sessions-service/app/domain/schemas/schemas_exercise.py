@@ -6,24 +6,57 @@ from uuid import UUID
 
 
 class ExerciseBase(BaseModel):
-    name: str
+    pass
+
+
+class ExerciseCreate(ExerciseBase):
+
+    exercise_name: str=None
+    session_name: str
+    user_name: str
     description: Optional[str] = None
     weight: Optional[float] = None
     reps: Optional[int] = None
     series: Optional[int] = None
-    duration: Optional[float] = None  # en minutos, si aplica
-    distance: Optional[float] = None  # en metros o km, si aplica
-
-
-class ExerciseCreate(ExerciseBase):
-    session_id: UUID  # ID de la sesión a la que pertenece
+    duration: Optional[float] = None  
+    distance: Optional[float] = None  
+    
 
 
 class ExerciseRead(ExerciseBase):
     session_id: UUID
-    seession_name: Optional[str] = None  
+    user_id: UUID
+    exercise_id: UUID
+    exercise_name: str=None
+    session_name: str
+    user_name: str
+    description: Optional[str] = None
+    weight: Optional[float] = None
+    reps: Optional[int] = None
+    series: Optional[int] = None
+    duration: Optional[float] = None  
+    distance: Optional[float] = None   
 
 
 
     model_config = ConfigDict(from_attributes=True)
 
+class ExerciseUpdate(ExerciseBase):
+    exercise_name: str=None
+    session_name: str
+    user_name: str
+    description: Optional[str] = None
+    weight: Optional[float] = None
+    reps: Optional[int] = None
+    series: Optional[int] = None
+    duration: Optional[float] = None  
+    distance: Optional[float] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ExerciseDelete(ExerciseBase):
+    exercisename: str=None
+    session_name: str
+    user_name: str
+
+    model_config = ConfigDict(from_attributes=True)
