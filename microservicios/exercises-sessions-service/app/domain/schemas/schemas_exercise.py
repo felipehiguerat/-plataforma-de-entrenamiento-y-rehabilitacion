@@ -11,9 +11,9 @@ class ExerciseBase(BaseModel):
 
 class ExerciseCreate(ExerciseBase):
 
-    exercise_name: str=None
-    session_name: str
-    user_name: str
+    name_exercise: str=None
+    name_session: str
+    username: str
     description: Optional[str] = None
     weight: Optional[float] = None
     reps: Optional[int] = None
@@ -25,11 +25,8 @@ class ExerciseCreate(ExerciseBase):
 
 class ExerciseRead(ExerciseBase):
     session_id: UUID
-    user_id: UUID
     exercise_id: UUID
-    exercise_name: str=None
-    session_name: str
-    user_name: str
+    name_exercise: str=None
     description: Optional[str] = None
     weight: Optional[float] = None
     reps: Optional[int] = None
@@ -42,9 +39,9 @@ class ExerciseRead(ExerciseBase):
     model_config = ConfigDict(from_attributes=True)
 
 class ExerciseUpdate(ExerciseBase):
-    exercise_name: str=None
-    session_name: str
-    user_name: str
+    name_exercise: str=None
+    name_session: str
+    username: str
     description: Optional[str] = None
     weight: Optional[float] = None
     reps: Optional[int] = None
@@ -56,7 +53,7 @@ class ExerciseUpdate(ExerciseBase):
 
 class ExerciseDelete(ExerciseBase):
     exercisename: str=None
-    session_name: str
-    user_name: str
+    name_session: str
+    username: str
 
     model_config = ConfigDict(from_attributes=True)
