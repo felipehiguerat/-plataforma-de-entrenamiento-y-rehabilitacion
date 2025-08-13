@@ -60,9 +60,22 @@ async def create_new_exercise(exercise_data: ExerciseCreate, db: Session = Depen
             detail=str(e)
         )
 
-@router.delete("/exercise/{id}", response_model=dict)
-async def delete_exercise(id: str, db: Session = Depends(get_db)):
-    was_deleted = await crud_session.delete_exercise(db=db, id=id)
+@router.delete("/exercises/{username}/{name_session}/{name_exercise}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_exercise_by_info(
+    username: str,
+    name_session: str,
+    name_exercise: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Elimina un ejercicio a partir de los datos proporcionados.
+    """
+    was_deleted = await crud_session.delete_exercise(db, username, name_session, name_exercise)
+    
     if not was_deleted:
-        raise HTTPException(status_code=404, detail=" exercise not found")
-    return {"message": "Exercise deleted successfully", "id": id}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Exercise not found."
+        )
+    
+    return {"message": "Exercise deleted successfully."}

@@ -93,10 +93,22 @@ def get_session(db: Session, session_id: int) -> SessionModel | None:
    
     return db.query(SessionModel).filter(SessionModel.id == session_id).first()
 
-def delete_session(db: Session, session_id: int) -> SessionModel | None:
- 
-    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
-    if session:
-        db.delete(session)
+async def delete_exercise_by_attributes(db: Session, username: str, name_session: str, name_exercise: str) -> bool:
+    # 1. Encontrar la sesión correcta
+    session = await get_session_by_username_and_name(db, username, name_session)
+    
+    if not session:
+        return False 
+    
+    to_delete = db.query(Exercise).filter(
+        Exercise.session_id == session.id,
+        Exercise.name_exercise == name_exercise
+    ).first()
+
+   
+    if to_delete:
+        db.delete(to_delete)
         db.commit()
-    return session
+        return True
+    
+    return False
