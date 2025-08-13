@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.repository import  crud_session
+from app.repository import  crud_exercise as crud_session
 from app.domain.schemas.schemas_exercise import ExerciseCreate, ExerciseRead
 from app.domain.schemas.schema_sesssion import ExerciseSessionCreate, ExerciseSessionRead
-from app.repository.crud_exercise import *
+
 
 
 
@@ -47,9 +47,18 @@ def get_all_exercises(db: Session = Depends(get_db)):
 
 
 
-@router.post("/exercises", response_model=ExerciseRead)
-def add_exercise(exercise_data: ExerciseCreate, db: Session = Depends(get_db)):
-    return crud_session.add_exercise_to_session(db, exercise_data)
+@router.post("/exercises", response_model=ExerciseRead, status_code=status.HTTP_201_CREATED)
+async def create_new_exercise(exercise_data: ExerciseCreate, db: Session = Depends(get_db)):
+
+    try:
+       
+        new_exercise = await crud_session.create_exercise(db, exercise_data)
+        return new_exercise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
 
 @router.delete("/exercise/{id}", response_model=dict)
 async def delete_exercise(id: str, db: Session = Depends(get_db)):

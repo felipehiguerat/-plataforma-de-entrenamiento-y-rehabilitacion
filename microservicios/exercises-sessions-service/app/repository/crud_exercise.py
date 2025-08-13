@@ -5,7 +5,8 @@ from app.domain.schemas.schema_sesssion import ExerciseSessionCreate, ExerciseSe
 # Importa los esquemas de sesión desde el archivo de sesiones
 
 from typing import List, Optional
-from app.services.user_client import  get_user_by_username, validate_user_exists
+from app.services.user_client import  get_user_by_username
+from app.services.session_service import add_exercise_to_session
 
 
 
@@ -14,23 +15,17 @@ from app.services.user_client import  get_user_by_username, validate_user_exists
 # CRUD - Exercise
 # ---------------------
 
-def add_exercise_to_session(db: Session, exercise_data: ExerciseCreate) -> Exercise:
-     if not exercise_data.session_id:
-            raise ValueError("session_id is required for creating an exercise")
-     exercise = Exercise(
-     name=exercise_data.name,
-     description=exercise_data.description,
-     weight=exercise_data.weight,
-     reps=exercise_data.reps,
-     series=exercise_data.series,
-     duration=exercise_data.duration,
-     distance=exercise_data.distance,
-     session_id=exercise_data.session_id
-    )
-     db.add(exercise)
-     db.commit()
-     db.refresh(exercise)
-     return exercise
+async def create_exercise(db: Session, exercise_data: ExerciseCreate) -> Exercise:
+    """
+    Función CRUD para crear un ejercicio en la base de datos.
+    Llama al servicio para manejar la lógica de negocio.
+    """
+    # Llama a la función de servicio que se encarga de la lógica.
+    # Esta función se encargará de encontrar la sesión correcta
+    # y de crear el ejercicio.
+    new_exercise = await add_exercise_to_session(db, exercise_data)
+    
+    return new_exercise
 
 
 def get_all_exercises(db: Session) -> List[ExerciseRead]:
