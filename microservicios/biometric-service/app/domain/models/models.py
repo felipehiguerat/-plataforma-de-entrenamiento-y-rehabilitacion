@@ -11,7 +11,9 @@ class Biometric(Base):
     
     biometricId = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     userId = Column(UUID(as_uuid=True), nullable=False)
-    
+    username = Column(String, nullable=False)
+    edad = Column(Integer, nullable=False)
+    genero = Column(String, nullable=False)
     talla = Column(Float, nullable=False)
     peso = Column(Float, nullable=False)
     

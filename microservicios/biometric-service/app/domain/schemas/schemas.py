@@ -4,9 +4,13 @@ from uuid import UUID
 from datetime import datetime
 
 
-
 class BiometricBase(BaseModel):
-    userId: UUID
+    pass
+class BiometricCreateData(BiometricBase):
+    userId: Optional[UUID] = None
+    username: str
+    edad: int
+    genero: str
     talla: float = Field(..., gt=0, description="Talla en metros")
     peso: float = Field(..., gt=0, description="Peso en kilogramos")
     imc: Optional[float] = None
@@ -28,17 +32,47 @@ class BiometricBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class BiometricCreate(BiometricBase):
-    pass
+
+
+
+class BiometricCreateRequest(BaseModel):
+    username: str
+    peso: float
+    talla: float
+    edad: int
+    genero: str
+    imc: Optional[float] = None
+    grasaCorporal: Optional[float] = None
+    masaMuscular: Optional[float] = None
+    presionSistolica: Optional[int] = None
+    presionDiastolica: Optional[int] = None
+    frecuenciaCardiaca: Optional[int] = None
+
+    
+    
+    imc: Optional[float] = None
 
 class BiometricRead(BiometricBase):
+    userId: Optional[UUID] = None
     biometricId: UUID
-    fechaRegistro: datetime
-
+    username: str
+    talla: float = Field(..., gt=0, description="Talla en metros")
+    peso: float = Field(..., gt=0, description="Peso en kilogramos")
+    edad: int
+    genero: str
+    imc: Optional[float] = None
+    grasaCorporal: Optional[float] = None
+    masaMuscular: Optional[float] = None
+    presionSistolica: Optional[int] = None
+    presionDiastolica: Optional[int] = None
+    frecuenciaCardiaca: Optional[int] = None
 
 class BiometricUpdate(BaseModel):
+    username: str
     talla: Optional[float] = Field(None, gt=0, description="Talla en metros")
     peso: Optional[float] = Field(None, gt=0, description="Peso en kilogramos")
+    edad: Optional[int] = None
+    genero: Optional[str] = None
     imc: Optional[float] = None
     grasaCorporal: Optional[float] = None
     masaMuscular: Optional[float] = None
@@ -62,6 +96,7 @@ class BiometricUpdate(BaseModel):
         return v
     
 class BiometricDelete(BaseModel):
-    biometricId: UUID
+   username: str
 
-    model_config = ConfigDict(from_attributes=True)
+
+model_config = ConfigDict(from_attributes=True)

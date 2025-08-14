@@ -5,7 +5,7 @@ from uuid import UUID
 
 from app.api.dependencies import get_db, get_biometric_service
 from app.domain.schemas.schemas import (
-    BiometricCreate,
+    BiometricCreateRequest,
     BiometricRead
     
 )
@@ -14,18 +14,20 @@ from app.servicies.biometric_service import BiometricService
 router = APIRouter(prefix="/biometrics", tags=["Biometrics"])
 
 
-@router.post("/", response_model=BiometricRead, status_code=status.HTTP_201_CREATED)
-def record_biometric_data(
-    data: BiometricCreate,
-    biometric_service: BiometricService = Depends(get_biometric_service),
-    db: Session = Depends(get_db)
+@router.post("/biometrics", response_model=BiometricRead, status_code=status.HTTP_201_CREATED)
+async def create_biometric_record(
+    biometric_data: BiometricCreateRequest,  
+    db: Session = Depends(get_db),
+    biometric_service: BiometricService = Depends(get_biometric_service)
 ):
-    """
-    Crea un nuevo registro biométrico para un usuario.
-    El IMC se calcula automáticamente.
-    """
-    return biometric_service.create_new_record(db, data)
-
+    try:
+        new_biometric = await biometric_service.create_new_record(db, biometric_data)
+        return new_biometric
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
 
 @router.get("/user/{user_id}", response_model=List[BiometricRead])
 def get_user_metrics_by_id(
@@ -80,7 +82,7 @@ def get_user_progress_analysis(
 @router.patch("/{biometric_id}", response_model=BiometricRead)
 def update_biometric_record(
     biometric_id: UUID,
-    biometric_update: BiometricCreate,
+    biometric_update: BiometricCreateRequest,
     biometric_service: BiometricService = Depends(get_biometric_service),
     db: Session = Depends(get_db)
 ):

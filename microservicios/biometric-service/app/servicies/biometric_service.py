@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
-from app.domain.schemas.schemas import BiometricRead,BiometricBase,BiometricCreate, BiometricUpdate
+from app.domain.schemas.schemas import BiometricRead,BiometricBase,BiometricCreateData, BiometricUpdate,BiometricCreateRequest
 from app.repository.bometric_repo import BiometricRepository
 from app.servicies.user_service import get_user_by_username
 
@@ -14,17 +14,32 @@ class BiometricService:
     def __init__(self, biometric_repository: BiometricRepository):
         self.biometric_repository = biometric_repository
 
-    def create_new_record(self, db: Session, data: BiometricCreate) -> BiometricRead:
-        """
-        Calcula el IMC y crea un nuevo registro biométrico.
-        """
-        # Lógica de negocio para calcular el IMC antes de guardar
-        if data.talla and data.peso:
-            data.imc = data.peso / (data.talla ** 2)
+    async def create_new_record(self, db: Session, data: BiometricCreateRequest) -> BiometricRead:
+      
+        user = await get_user_by_username(data.username)
+        if not user:
+            raise ValueError(f"User with username '{data.username}' not found.")
+        
+        biometric_data = BiometricCreateData(
+            userId=user['id'],
+            username=data.username,
+            peso=data.peso,
+            talla=data.talla,
+            edad=data.edad,
+            genero=data.genero,
+            imc=None # Se calculará a continuación
+        )
 
-        logger.info(f"Procesando nuevo registro biométrico para el usuario: {data.userId}")
-        db_biometric = self.biometric_repository.create(db, data)
+        # 3. Lógica de negocio para calcular el IMC
+        if biometric_data.talla and biometric_data.peso:
+            biometric_data.imc = biometric_data.peso / (biometric_data.talla ** 2)
+
+        logger.info(f"Procesando nuevo registro biométrico para el usuario: {data.username} (ID: {biometric_data.userId})")
+        db_biometric = self.biometric_repository.create(db, biometric_data)
+        
         return BiometricRead.model_validate(db_biometric)
+        
+       
 
     def get_biometric_data_by_user(self, db: Session, user_id: UUID) -> List[BiometricRead]:
         return self.biometric_repository.get_by_user_id(db, user_id)
